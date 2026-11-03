@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { JournalEntry } from '../types';
-import { getSupabase } from '../lib/supabase';
+import { getSupabase, describeDbError } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -45,8 +45,7 @@ export function useJournal() {
 
       setEntries(data || []);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load journal entries';
-      console.error('Fetch journal error:', err);
+      const message = describeDbError('load journal', err, 'Failed to load journal entries');
       setError(message);
     } finally {
       setLoading(false);
@@ -102,7 +101,7 @@ export function useJournal() {
       return true;
     } catch (err: unknown) {
       setEntries((prev) => prev.filter((e) => e.id !== tempId));
-      const message = err instanceof Error ? err.message : 'Failed to save entry';
+      const message = describeDbError('add journal', err, 'Failed to save entry');
       addToast(message, 'error');
       return false;
     }
@@ -149,7 +148,7 @@ export function useJournal() {
       return true;
     } catch (err: unknown) {
       setEntries(previousEntries);
-      const message = err instanceof Error ? err.message : 'Failed to update entry';
+      const message = describeDbError('update journal', err, 'Failed to update entry');
       addToast(message, 'error');
       return false;
     }
@@ -178,7 +177,7 @@ export function useJournal() {
       return true;
     } catch (err: unknown) {
       setEntries(previousEntries);
-      const message = err instanceof Error ? err.message : 'Failed to delete entry';
+      const message = describeDbError('delete journal', err, 'Failed to delete entry');
       addToast(message, 'error');
       return false;
     }
