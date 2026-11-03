@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Task } from '../types';
-import { getSupabase } from '../lib/supabase';
+import { getSupabase, describeDbError } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -45,8 +45,7 @@ export function useTasks() {
 
       setTasks(data || []);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load tasks';
-      console.error('Fetch tasks error:', err);
+      const message = describeDbError('load tasks', err, 'Failed to load tasks');
       setError(message);
     } finally {
       setLoading(false);
@@ -101,7 +100,7 @@ export function useTasks() {
       return true;
     } catch (err: unknown) {
       setTasks((prev) => prev.filter((t) => t.id !== tempId));
-      const message = err instanceof Error ? err.message : 'Failed to add task';
+      const message = describeDbError('add tasks', err, 'Failed to add task');
       addToast(message, 'error');
       return false;
     }
@@ -140,7 +139,7 @@ export function useTasks() {
       }
     } catch (err: unknown) {
       setTasks(previousTasks);
-      const message = err instanceof Error ? err.message : 'Failed to update task';
+      const message = describeDbError('toggle tasks', err, 'Failed to update task');
       addToast(message, 'error');
     }
   };
@@ -179,7 +178,7 @@ export function useTasks() {
       return true;
     } catch (err: unknown) {
       setTasks(previousTasks);
-      const message = err instanceof Error ? err.message : 'Failed to edit task';
+      const message = describeDbError('edit tasks', err, 'Failed to edit task');
       addToast(message, 'error');
       return false;
     }
@@ -208,7 +207,7 @@ export function useTasks() {
       return true;
     } catch (err: unknown) {
       setTasks(previousTasks);
-      const message = err instanceof Error ? err.message : 'Failed to delete task';
+      const message = describeDbError('delete tasks', err, 'Failed to delete task');
       addToast(message, 'error');
       return false;
     }

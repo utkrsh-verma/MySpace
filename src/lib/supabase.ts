@@ -164,3 +164,34 @@ export function extractUserProfile(user: User | null): UserProfile | null {
     avatar_url: metadata.avatar_url || metadata.picture || null,
   };
 }
+
+/**
+ * Supabase/PostgREST errors are plain objects (not `Error` instances), so
+ * `err instanceof Error` is false for them. This extracts the real message,
+ * logs the full diagnostic (never tokens/keys), and returns a user-facing string.
+ */
+export function describeDbError(context: string, err: unknown, fallback: string): string {
+  const e = (err ?? {}) as {
+    message?: string;
+    code?: string;
+    details?: string | null;
+    hint?: string | null;
+    status?: number;
+  };
+  console.error(`[MySpace db] ${context}`, {
+    message: e.message,
+    code: e.code,
+    details: e.details,
+    hint: e.hint,
+    status: e.status,
+  });
+
+  const message = e.message || (err instanceof Error ? err.message : '') || fallback;
+  if (e.code === 'PGRST205' || e.code === '42P01') {
+    return `${message} (table missing: run schema.sql in the Supabase SQL Editor)`;
+  }
+  if (e.code === '42501') {
+    return `${message} (permission/RLS denied: check policies and grants)`;
+  }
+  return message;
+}
