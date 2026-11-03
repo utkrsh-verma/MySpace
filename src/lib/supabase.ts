@@ -7,7 +7,21 @@ import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { UserProfile } from '../types';
 
 /**
+ * Sanitizes and normalizes the Supabase project URL.
+ * Strips accidental subpaths (like /rest/v1 or /auth/v1) and trailing slashes.
+ */
+export function sanitizeSupabaseUrl(rawUrl: string): string {
+  let url = rawUrl.trim();
+  url = url.replace(/\/rest\/v1\/?$/i, '');
+  url = url.replace(/\/auth\/v1\/?$/i, '');
+  url = url.replace(/\/+$/, '');
+  return url;
+}
+
+/**
  * Validates and retrieves Supabase credentials exclusively from environment variables.
+ * Returns null if either VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is missing,
+ * empty, or contains a placeholder string.
  */
 export function getSupabaseCredentials(): { url: string; anonKey: string } | null {
   const envUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
@@ -17,7 +31,7 @@ export function getSupabaseCredentials(): { url: string; anonKey: string } | nul
     return null;
   }
 
-  // Ensure values are not placeholder strings
+  // Reject placeholder values
   if (
     envUrl.includes('your-project') ||
     envKey.includes('your-anon') ||
@@ -26,9 +40,11 @@ export function getSupabaseCredentials(): { url: string; anonKey: string } | nul
     return null;
   }
 
-  // Validate URL format
+  const cleanUrl = sanitizeSupabaseUrl(envUrl);
+
+  // Validate URL structure
   try {
-    const parsed = new URL(envUrl);
+    const parsed = new URL(cleanUrl);
     if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
       return null;
     }
@@ -36,7 +52,7 @@ export function getSupabaseCredentials(): { url: string; anonKey: string } | nul
     return null;
   }
 
-  return { url: envUrl, anonKey: envKey };
+  return { url: cleanUrl, anonKey: envKey };
 }
 
 export function isSupabaseConfigured(): boolean {
@@ -57,12 +73,19 @@ export function getSupabase(): SupabaseClient | null {
   }
 
   try {
+    // Initialize the single Supabase client with verified URL and anon key.
+    // Explicitly enforce apikey in global headers so all requests carry the key.
     clientInstance = createClient(creds.url, creds.anonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: 'pkce',
+      },
+      global: {
+        headers: {
+          apikey: creds.anonKey,
+        },
       },
     });
     return clientInstance;
@@ -74,7 +97,7 @@ export function getSupabase(): SupabaseClient | null {
 
 /**
  * Initiates official Supabase Google OAuth sign-in flow.
- * Redirects to the current website origin as callback destination.
+ * Uses window.location.origin as the callback destination.
  */
 export async function signInWithGoogle(): Promise<{ error: Error | null }> {
   const client = getSupabase();
