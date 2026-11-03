@@ -28,6 +28,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/** Strips Google authorization codes (4/0A...) and JWT-like tokens from text. */
+function redactSecrets(text: string): string {
+  return text
+    .replace(/\b4\/[0-9A-Za-z_-]+/g, '[redacted-code]')
+    .replace(/\beyJ[0-9A-Za-z_-]+\.[0-9A-Za-z_-]+\.[0-9A-Za-z_-]*/g, '[redacted-token]');
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -56,17 +63,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search);
       const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-      const urlError =
-        searchParams.get('error_description') ||
-        searchParams.get('error') ||
-        hashParams.get('error_description') ||
-        hashParams.get('error');
+      const pick = (key: string) => searchParams.get(key) || hashParams.get(key);
+      const urlError = pick('error_description') || pick('error');
 
       if (urlError) {
-        const decoded = decodeURIComponent(urlError.replace(/\+/g, ' '));
-        console.error('OAuth URL Error detected:', decoded);
+        // URLSearchParams already decodes; never log or show raw authorization codes.
+        const decoded = redactSecrets(urlError);
+        // Safe diagnostics: error name/code/message only (no tokens, codes or keys).
+        console.error('[MySpace auth] OAuth callback error', {
+          error: pick('error'),
+          error_code: pick('error_code'),
+          message: decoded,
+        });
         if (isMounted) {
-          setAuthError(decoded);
+          setAuthError(
+            /exchange external code/i.test(decoded)
+              ? `${decoded} — Supabase could not complete the Google token exchange. ` +
+                  'Check the Google Client ID/Secret saved in Supabase (Authentication → Providers → Google) ' +
+                  'and that the Google OAuth client allows the Supabase callback URL.'
+              : decoded
+          );
           setLoading(false);
         }
         // Clean URL to prevent re-triggering error on reload
@@ -128,7 +144,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .then(({ data: { session: currentSession }, error }) => {
         if (!isMounted) return;
         if (error) {
-          console.error('Supabase getSession error:', error.message);
+          console.error('[MySpace auth] getSession error', {
+            name: error.name,
+            status: (error as { status?: number }).status,
+            code: (error as { code?: string }).code,
+            message: redactSecrets(error.message),
+          });
         }
 
         if (currentSession?.user) {
