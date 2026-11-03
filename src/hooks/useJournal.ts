@@ -64,7 +64,7 @@ export function useJournal() {
     const trimmedTitle = title.trim() || null;
     const client = getSupabase();
     if (!client) {
-      addToast('Supabase client not connected', 'error');
+      addToast('Database connection not available', 'error');
       return false;
     }
 

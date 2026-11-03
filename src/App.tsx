@@ -12,14 +12,12 @@ import { JournalPage } from './pages/Journal';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { BottomNavigation } from './components/BottomNavigation';
-import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { ActiveTab } from './types';
 import { useTasks } from './hooks/useTasks';
 import { useJournal } from './hooks/useJournal';
 
 function MainLayout() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('tasks');
-  const [showConfigModal, setShowConfigModal] = useState(false);
 
   // Load counts for sidebar & navigation badges
   const { pendingTasks } = useTasks();
@@ -33,14 +31,10 @@ function MainLayout() {
         onTabChange={setActiveTab}
         pendingTasksCount={pendingTasks.length}
         journalEntriesCount={entries.length}
-        onOpenConfig={() => setShowConfigModal(true)}
       />
 
       {/* Mobile Top Header */}
-      <Header
-        activeTab={activeTab}
-        onOpenConfig={() => setShowConfigModal(true)}
-      />
+      <Header activeTab={activeTab} />
 
       {/* Main Content Area */}
       <main className="flex-1 md:pl-64 min-h-screen pb-24 md:pb-8">
@@ -53,12 +47,6 @@ function MainLayout() {
         onTabChange={setActiveTab}
         pendingTasksCount={pendingTasks.length}
         journalEntriesCount={entries.length}
-      />
-
-      {/* Supabase Configuration Modal */}
-      <SupabaseConfigModal
-        isOpen={showConfigModal}
-        onClose={() => setShowConfigModal(false)}
       />
     </div>
   );

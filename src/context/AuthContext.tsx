@@ -22,7 +22,6 @@ interface AuthContextType {
   isConfigured: boolean;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
-  reloadConfig: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,22 +31,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isConfigured, setIsConfigured] = useState<boolean>(isSupabaseConfigured());
+  const isConfigured = isSupabaseConfigured();
 
-  const initAuth = useCallback(async () => {
-    setLoading(true);
-    const configured = isSupabaseConfigured();
-    setIsConfigured(configured);
-
-    if (!configured) {
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
-
+  useEffect(() => {
+    let isMounted = true;
     const client = getSupabase();
+
     if (!client) {
       setUser(null);
       setSession(null);
@@ -56,67 +45,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    try {
-      const { data: { session: initialSession }, error } = await client.auth.getSession();
-      if (error) {
-        console.warn('Supabase getSession error:', error.message);
-      }
-      if (initialSession?.user) {
-        setSession(initialSession);
-        setUser(initialSession.user);
-        setProfile(extractUserProfile(initialSession.user));
+    // 1. Initial session restoration
+    client.auth
+      .getSession()
+      .then(({ data: { session: currentSession }, error }) => {
+        if (!isMounted) return;
+        if (error) {
+          console.error('Supabase getSession error:', error.message);
+        }
+        if (currentSession?.user) {
+          setSession(currentSession);
+          setUser(currentSession.user);
+          setProfile(extractUserProfile(currentSession.user));
+        } else {
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        console.error('Failed to restore Supabase session:', err);
+        setLoading(false);
+      });
+
+    // 2. Auth state subscription (handles SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED)
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange((_event, currentSession) => {
+      if (!isMounted) return;
+      if (currentSession?.user) {
+        setSession(currentSession);
+        setUser(currentSession.user);
+        setProfile(extractUserProfile(currentSession.user));
       } else {
         setSession(null);
         setUser(null);
         setProfile(null);
       }
-    } catch (err) {
-      console.error('Error checking auth state:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    initAuth();
-
-    const client = getSupabase();
-    if (!client) return;
-
-    const { data: { subscription } } = client.auth.onAuthStateChange((_event, currentSession) => {
-      setSession(currentSession);
-      const currentUser = currentSession?.user ?? null;
-      setUser(currentUser);
-      setProfile(extractUserProfile(currentUser));
       setLoading(false);
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
-  }, [initAuth]);
+  }, []);
 
-  const signInWithGoogle = async () => {
-    setLoading(true);
-    const res = await authSignInWithGoogle();
-    if (res.error) {
-      setLoading(false);
-    }
-    return res;
-  };
+  const signInWithGoogle = useCallback(async (): Promise<{ error: Error | null }> => {
+    return await authSignInWithGoogle();
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     setLoading(true);
     await authSignOut();
     setUser(null);
     setSession(null);
     setProfile(null);
     setLoading(false);
-  };
-
-  const reloadConfig = () => {
-    initAuth();
-  };
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -128,7 +116,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isConfigured,
         signInWithGoogle,
         signOut,
-        reloadConfig,
       }}
     >
       {children}

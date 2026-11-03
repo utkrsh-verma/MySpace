@@ -63,7 +63,7 @@ export function useTasks() {
 
     const client = getSupabase();
     if (!client) {
-      addToast('Supabase client not connected', 'error');
+      addToast('Database connection not available', 'error');
       return false;
     }
 
@@ -77,7 +77,6 @@ export function useTasks() {
       updated_at: new Date().toISOString(),
     };
 
-    // Optimistic insert
     setTasks((prev) => [optimisticTask, ...prev]);
 
     try {
@@ -95,14 +94,12 @@ export function useTasks() {
         throw insertErr;
       }
 
-      // Replace optimistic task with real record from database
       if (data) {
         setTasks((prev) => prev.map((t) => (t.id === tempId ? data : t)));
       }
       addToast('Task added', 'success');
       return true;
     } catch (err: unknown) {
-      // Revert optimistic task
       setTasks((prev) => prev.filter((t) => t.id !== tempId));
       const message = err instanceof Error ? err.message : 'Failed to add task';
       addToast(message, 'error');
@@ -115,7 +112,6 @@ export function useTasks() {
     const client = getSupabase();
     if (!client) return;
 
-    // Optimistic toggle
     const previousTasks = [...tasks];
     setTasks((prev) =>
       prev.map((t) =>
@@ -143,7 +139,6 @@ export function useTasks() {
         addToast('Task completed', 'success');
       }
     } catch (err: unknown) {
-      // Revert
       setTasks(previousTasks);
       const message = err instanceof Error ? err.message : 'Failed to update task';
       addToast(message, 'error');

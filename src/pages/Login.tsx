@@ -5,48 +5,33 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Database, AlertCircle } from 'lucide-react';
-import { SupabaseConfigModal } from '../components/SupabaseConfigModal';
+import { AlertCircle } from 'lucide-react';
 
 export const Login: React.FC = () => {
-  const { signInWithGoogle, isConfigured, loading } = useAuth();
+  const { signInWithGoogle, isConfigured } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showConfigModal, setShowConfigModal] = useState(false);
 
-  const handleGoogleLogin = async () => {
+  const handleContinueWithGoogle = async () => {
+    setErrorMessage(null);
+
     if (!isConfigured) {
-      setShowConfigModal(true);
+      setErrorMessage(
+        'Supabase configuration is missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment.'
+      );
       return;
     }
 
-    setErrorMessage(null);
     setIsSigningIn(true);
     const { error } = await signInWithGoogle();
     if (error) {
-      setErrorMessage(error.message || 'Google sign-in could not be completed. Please try again.');
+      setErrorMessage(error.message);
       setIsSigningIn(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center p-6 bg-[#0D0F12] relative overflow-hidden">
-      {/* Subtle top configuration banner if credentials need setup */}
-      {!isConfigured && !loading && (
-        <div className="absolute top-6 left-6 right-6 max-w-md mx-auto p-3 rounded-xl bg-[#14171C] border border-amber-500/30 flex items-center justify-between gap-3 text-xs shadow-lg animate-in fade-in duration-300">
-          <div className="flex items-center gap-2 text-amber-300">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>Supabase credentials needed for Google OAuth & Database.</span>
-          </div>
-          <button
-            onClick={() => setShowConfigModal(true)}
-            className="px-2.5 py-1 text-xs font-medium text-[#0D0F12] bg-amber-400 hover:bg-amber-300 rounded-md transition-colors shrink-0 cursor-pointer"
-          >
-            Configure
-          </button>
-        </div>
-      )}
-
+    <div className="min-h-screen w-full flex flex-col items-center justify-center p-6 bg-[#0D0F12] relative select-none">
       <div className="w-full max-w-sm flex flex-col items-center text-center">
         {/* Brand Icon */}
         <div className="w-12 h-12 rounded-xl bg-[#14171C] border border-[#292E38] flex items-center justify-center text-[#8998F5] mb-8 shadow-sm">
@@ -65,20 +50,21 @@ export const Login: React.FC = () => {
 
         {/* Error message */}
         {errorMessage && (
-          <div className="w-full mb-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-left flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="w-full mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 text-left flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="font-medium">Authentication Error</p>
-              <p className="text-rose-300/80 mt-0.5">{errorMessage}</p>
+              <p className="font-medium text-rose-200">Authentication Notice</p>
+              <p className="text-rose-300/90 mt-0.5 leading-relaxed">{errorMessage}</p>
             </div>
           </div>
         )}
 
-        {/* Prominent Google Sign-in Button */}
+        {/* Continue with Google Button */}
         <button
-          onClick={handleGoogleLogin}
-          disabled={isSigningIn || loading}
-          className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-xl bg-[#14171C] hover:bg-[#191D24] border border-[#292E38] hover:border-[#8998F5]/50 text-[#F5F5F5] font-medium text-sm transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm group"
+          type="button"
+          onClick={handleContinueWithGoogle}
+          disabled={isSigningIn}
+          className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl bg-[#14171C] hover:bg-[#191D24] border border-[#292E38] hover:border-[#8998F5]/50 text-[#F5F5F5] font-medium text-sm transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
           {/* Official Google 'G' icon */}
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -101,25 +87,7 @@ export const Login: React.FC = () => {
           </svg>
           <span>{isSigningIn ? 'Connecting to Google...' : 'Continue with Google'}</span>
         </button>
-
-        {/* Footer info & Supabase connection link */}
-        <div className="mt-8 flex items-center gap-3 text-xs text-[#9299A5]">
-          <span>Single Google Sign-in</span>
-          <span aria-hidden="true">·</span>
-          <button
-            type="button"
-            onClick={() => setShowConfigModal(true)}
-            className="hover:text-[#F5F5F5] underline underline-offset-4 decoration-[#292E38] hover:decoration-[#8998F5] transition-colors cursor-pointer"
-          >
-            Backend Setup
-          </button>
-        </div>
       </div>
-
-      <SupabaseConfigModal
-        isOpen={showConfigModal}
-        onClose={() => setShowConfigModal(false)}
-      />
     </div>
   );
 };
