@@ -8,12 +8,15 @@ import { useAuth } from '../context/AuthContext';
 import { AlertCircle } from 'lucide-react';
 
 export const Login: React.FC = () => {
-  const { signInWithGoogle, isConfigured } = useAuth();
+  const { signInWithGoogle, isConfigured, authError, clearAuthError } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const displayError = errorMessage || authError;
+
   const handleContinueWithGoogle = async () => {
     setErrorMessage(null);
+    clearAuthError();
 
     if (!isConfigured) {
       setErrorMessage(
@@ -49,12 +52,12 @@ export const Login: React.FC = () => {
         </p>
 
         {/* Error message */}
-        {errorMessage && (
+        {displayError && (
           <div className="w-full mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 text-left flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="font-medium text-rose-200">Authentication Notice</p>
-              <p className="text-rose-300/90 mt-0.5 leading-relaxed">{errorMessage}</p>
+              <p className="text-rose-300/90 mt-0.5 leading-relaxed">{displayError}</p>
             </div>
           </div>
         )}
