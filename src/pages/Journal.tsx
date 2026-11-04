@@ -11,7 +11,7 @@ import { JournalEditor } from '../components/JournalEditor';
 import { JournalReader } from '../components/JournalReader';
 import { EmptyState } from '../components/EmptyState';
 import { Plus, Search } from 'lucide-react';
-import { countWords, writingStreak } from '../lib/text';
+import { writingStreak } from '../lib/text';
 
 type Range = 'all' | 'week';
 
@@ -50,11 +50,9 @@ export const JournalPage: React.FC = () => {
   };
 
   const stats = useMemo(() => {
-    const totalWords = entries.reduce((sum, e) => sum + countWords(e.content), 0);
     return {
       streak: writingStreak(entries),
       total: entries.length,
-      avgWords: entries.length ? Math.round(totalWords / entries.length) : 0,
     };
   }, [entries]);
 
@@ -104,7 +102,6 @@ export const JournalPage: React.FC = () => {
   const statTiles = [
     { label: 'Writing streak', value: `${stats.streak} ${stats.streak === 1 ? 'day' : 'days'}` },
     { label: 'Total entries', value: `${stats.total} recorded` },
-    { label: 'Average length', value: `${stats.avgWords} w/entry` },
   ];
 
   return (
@@ -112,12 +109,12 @@ export const JournalPage: React.FC = () => {
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-violet-soft">
-            Chronicler
+            Personal reflections
           </p>
           <h1 className="font-display text-4xl sm:text-5xl text-ink tracking-tight mt-2">
             My Journal
           </h1>
-          <p className="text-sm text-ink2 mt-2">Reflections, ideas, and daily chronicles.</p>
+          <p className="text-sm text-ink2 mt-2">A place to pause and reflect.</p>
         </div>
 
         <button
@@ -138,7 +135,7 @@ export const JournalPage: React.FC = () => {
 
       {entries.length > 0 && (
         <>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {statTiles.map((t) => (
               <div key={t.label} className="p-3 sm:p-5 rounded-2xl bg-s1 border border-line min-w-0">
                 <p className="text-[11px] sm:text-xs text-ink2 truncate">{t.label}</p>
