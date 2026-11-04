@@ -68,7 +68,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({ onOpenJournal }) => {
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em]">
-            <span className="text-amber">Focus canvas</span>
+            <span className="text-amber">Daily priorities</span>
             <span className="w-1 h-1 rounded-full bg-amber" />
             <span className="normal-case tracking-normal font-medium text-ink2">
               {pendingTasks.length} pending · {completedTasks.length} completed

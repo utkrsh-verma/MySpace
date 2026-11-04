@@ -49,7 +49,7 @@ export const Login: React.FC = () => {
         <h1 className="font-display text-4xl sm:text-5xl text-ink tracking-tight">MySpace</h1>
         <p className="mt-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink2">
           <span className="w-1.5 h-1.5 rounded-full bg-amber" />
-          Sanctuary for focus
+          Your quiet corner
         </p>
 
         <h2 className="mt-10 text-xl font-semibold text-ink">Welcome back</h2>
@@ -86,7 +86,7 @@ export const Login: React.FC = () => {
         </button>
 
         <div className="mt-10 w-10 h-px bg-line" />
-        <p className="mt-5 text-sm text-ink3">Simple, private, and always synced.</p>
+        <p className="mt-5 text-sm text-ink3">Made by Utkarsh Verma</p>
       </div>
     </div>
   );
