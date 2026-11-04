@@ -82,29 +82,42 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     }
   };
 
+  const stamp = new Date(task.is_completed ? task.updated_at : task.created_at);
+  const stampLabel = `${task.is_completed ? 'Completed' : 'Added'} ${stamp.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })}`;
+
   return (
     <>
-      <div className="group relative flex items-center justify-between gap-3 p-3.5 rounded-xl bg-[#191D24] border border-[#292E38] hover:border-[#384050] transition-colors">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          {/* Custom Checkbox */}
+      <div
+        className={`group flex items-center justify-between gap-2 pl-3 pr-1.5 py-2.5 rounded-xl border border-line transition-all hover:-translate-y-px hover:border-slate-400/20 ${
+          task.is_completed ? 'bg-s1/60' : 'bg-s1 hover:bg-s2'
+        }`}
+      >
+        <div className="flex items-center gap-1 min-w-0 flex-1">
+          {/* Circular checkbox (44px touch target, 20px visual) */}
           <button
             type="button"
             role="checkbox"
             aria-checked={task.is_completed}
             aria-label={task.is_completed ? 'Mark task incomplete' : 'Mark task complete'}
             onClick={() => onToggleComplete(task.id, !task.is_completed)}
-            className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer shrink-0 ${
-              task.is_completed
-                ? 'bg-[#8998F5] border-[#8998F5] text-[#0D0F12]'
-                : 'border-[#292E38] bg-[#14171C] hover:border-[#8998F5]/50'
-            }`}
+            className="w-10 h-10 -ml-2 flex items-center justify-center shrink-0 cursor-pointer"
           >
-            {task.is_completed && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+            <span
+              className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                task.is_completed
+                  ? 'bg-violet/60 border-violet/60 text-white'
+                  : 'border-slate-500 group-hover:border-violet'
+              }`}
+            >
+              {task.is_completed && <Check className="w-3 h-3 stroke-[3]" />}
+            </span>
           </button>
 
-          {/* Title or Inline Edit */}
           {isEditing ? (
-            <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex items-center gap-1 flex-1 min-w-0">
               <input
                 ref={inputRef}
                 type="text"
@@ -112,61 +125,66 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                 onChange={(e) => setEditTitle(e.target.value)}
                 onKeyDown={handleKeyDown}
                 disabled={isSaving}
-                className="flex-1 bg-[#14171C] border border-[#8998F5] rounded-md px-2.5 py-1 text-sm text-[#F5F5F5] focus:outline-none"
+                aria-label="Edit task title"
+                className="flex-1 min-w-0 bg-s2 border border-violet/60 rounded-lg px-3 py-2 text-[15px] text-ink focus:outline-none"
               />
               <button
                 type="button"
                 onClick={handleSaveEdit}
                 disabled={isSaving || !editTitle.trim()}
-                className="p-1.5 text-xs text-[#0D0F12] bg-[#8998F5] hover:bg-[#7888f3] rounded-md transition-colors cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center text-white bg-violet hover:bg-[#9b72f8] disabled:opacity-50 rounded-lg transition-colors cursor-pointer"
                 title="Save changes"
+                aria-label="Save changes"
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={handleCancelEdit}
                 disabled={isSaving}
-                className="p-1.5 text-xs text-[#9299A5] hover:text-[#F5F5F5] hover:bg-[#14171C] rounded-md transition-colors cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center text-ink2 hover:text-ink hover:bg-s3 rounded-lg transition-colors cursor-pointer"
                 title="Cancel"
+                aria-label="Cancel editing"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <span
+            <div
               onClick={() => onToggleComplete(task.id, !task.is_completed)}
-              className={`text-sm break-words flex-1 cursor-pointer select-none transition-all ${
-                task.is_completed
-                  ? 'line-through text-[#9299A5]/80'
-                  : 'text-[#F5F5F5]'
-              }`}
+              className="min-w-0 flex-1 cursor-pointer select-none py-1"
             >
-              {task.title}
-            </span>
+              <p
+                className={`text-[15px] break-words transition-colors ${
+                  task.is_completed ? 'line-through text-ink3' : 'text-ink'
+                }`}
+              >
+                {task.title}
+              </p>
+              <p className="text-xs text-ink3 mt-0.5">{stampLabel}</p>
+            </div>
           )}
         </div>
 
-        {/* Action icons */}
         {!isEditing && (
-          <div className="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity shrink-0">
+          <div className="flex items-center shrink-0 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100 transition-opacity">
             <button
               type="button"
               onClick={handleStartEdit}
               title="Edit task"
               aria-label="Edit task"
-              className="p-1.5 text-[#9299A5] hover:text-[#F5F5F5] hover:bg-[#14171C] rounded-md transition-colors cursor-pointer"
+              className="w-10 h-10 flex items-center justify-center text-ink2 hover:text-ink hover:bg-s3 rounded-lg transition-colors cursor-pointer"
             >
-              <Pencil className="w-3.5 h-3.5" />
+              <Pencil className="w-4 h-4" />
             </button>
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
               title="Delete task"
               aria-label="Delete task"
-              className="p-1.5 text-[#9299A5] hover:text-rose-400 hover:bg-[#14171C] rounded-md transition-colors cursor-pointer"
+              className="w-10 h-10 flex items-center justify-center text-ink2 hover:text-rose-400 hover:bg-s3 rounded-lg transition-colors cursor-pointer"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         )}

@@ -40,10 +40,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ compact = false }) => 
             alt={profile.full_name || 'User avatar'}
             referrerPolicy="no-referrer"
             onError={() => setImageError(true)}
-            className="w-8 h-8 rounded-full object-cover border border-[#292E38]"
+            className="w-8 h-8 rounded-full object-cover border border-line"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-[#191D24] border border-[#292E38] text-[#8998F5] flex items-center justify-center text-xs font-semibold">
+          <div className="w-8 h-8 rounded-full bg-s2 border border-line text-violet-soft flex items-center justify-center text-xs font-semibold">
             {initials}
           </div>
         )}
@@ -52,7 +52,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ compact = false }) => 
           disabled={isLoggingOut}
           title="Sign out"
           aria-label="Sign out"
-          className="p-1.5 text-[#9299A5] hover:text-[#F5F5F5] hover:bg-[#191D24] rounded-lg transition-colors cursor-pointer"
+          className="p-2.5 text-ink2 hover:text-ink hover:bg-s2 rounded-lg transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
         </button>
@@ -61,7 +61,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ compact = false }) => 
   }
 
   return (
-    <div className="p-3 rounded-xl bg-[#14171C] border border-[#292E38] flex items-center justify-between gap-3">
+    <div className="p-2.5 rounded-xl hover:bg-s2 flex items-center justify-between gap-3">
       <div className="flex items-center gap-3 min-w-0">
         {profile.avatar_url && !imageError ? (
           <img
@@ -69,18 +69,18 @@ export const UserProfile: React.FC<UserProfileProps> = ({ compact = false }) => 
             alt={profile.full_name || 'User avatar'}
             referrerPolicy="no-referrer"
             onError={() => setImageError(true)}
-            className="w-9 h-9 rounded-full object-cover border border-[#292E38] shrink-0"
+            className="w-9 h-9 rounded-full object-cover border border-line shrink-0"
           />
         ) : (
-          <div className="w-9 h-9 rounded-full bg-[#191D24] border border-[#292E38] text-[#8998F5] flex items-center justify-center text-xs font-semibold shrink-0">
+          <div className="w-9 h-9 rounded-full bg-s2 border border-line text-violet-soft flex items-center justify-center text-xs font-semibold shrink-0">
             {initials}
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-[#F5F5F5] truncate leading-tight">
+          <p className="text-sm font-medium text-ink truncate leading-tight">
             {profile.full_name || 'User'}
           </p>
-          <p className="text-xs text-[#9299A5] truncate leading-tight mt-0.5 font-mono text-[11px]">
+          <p className="text-[11px] text-ink3 truncate leading-tight mt-0.5">
             {profile.email || ''}
           </p>
         </div>
@@ -91,7 +91,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ compact = false }) => 
         disabled={isLoggingOut}
         title="Sign out of MySpace"
         aria-label="Sign out"
-        className="p-2 text-[#9299A5] hover:text-[#F5F5F5] hover:bg-[#191D24] rounded-lg transition-colors shrink-0 cursor-pointer"
+        className="p-2 text-ink2 hover:text-ink hover:bg-s3 rounded-lg transition-colors shrink-0 cursor-pointer"
       >
         <LogOut className="w-4 h-4" />
       </button>

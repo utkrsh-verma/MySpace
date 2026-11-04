@@ -5,7 +5,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { JournalEntry } from '../types';
-import { ArrowLeft, Check, Sparkles } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
+import { ConfirmationModal } from './ConfirmationModal';
+import { countWords, readMinutes } from '../lib/text';
 
 interface JournalEditorProps {
   initialEntry?: JournalEntry | null;
@@ -21,13 +23,15 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   const [title, setTitle] = useState(initialEntry?.title || '');
   const [content, setContent] = useState(initialEntry?.content || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [showDiscard, setShowDiscard] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
+    textareaRef.current?.focus();
   }, []);
+
+  const dirty =
+    title !== (initialEntry?.title || '') || content !== (initialEntry?.content || '');
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -41,77 +45,106 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     }
   };
 
-  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+  const handleDiscard = () => {
+    if (dirty) {
+      setShowDiscard(true);
+    } else {
+      onCancel();
+    }
+  };
+
+  const wordCount = countWords(content);
   const charCount = content.length;
+  const today = new Date(initialEntry?.created_at ?? Date.now()).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
 
   return (
-    <div className="w-full max-w-3xl mx-auto py-2 animate-in fade-in duration-150">
-      {/* Top action bar */}
-      <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-[#292E38]">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isSaving}
-          className="flex items-center gap-2 text-xs font-medium text-[#9299A5] hover:text-[#F5F5F5] transition-colors cursor-pointer py-1.5"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Journal</span>
-        </button>
-
-        <div className="flex items-center gap-3">
-          <div className="text-xs text-[#9299A5] hidden sm:block tabular-nums">
-            {wordCount} {wordCount === 1 ? 'word' : 'words'} · {charCount} chars
-          </div>
-
+    <div className="w-full max-w-[760px] mx-auto pb-28">
+      {/* Top bar */}
+      <div className="flex items-center justify-between gap-3 mb-8">
+        <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
-            onClick={onCancel}
+            onClick={handleDiscard}
             disabled={isSaving}
-            className="px-3.5 py-1.5 text-xs font-medium text-[#F5F5F5] bg-[#14171C] hover:bg-[#292E38] border border-[#292E38] rounded-lg transition-colors cursor-pointer"
+            className="flex items-center gap-2 min-h-[44px] pr-2 text-sm font-medium text-ink2 hover:text-ink transition-colors cursor-pointer"
           >
-            Cancel
+            <ArrowLeft className="w-4 h-4" />
+            <span>Journal</span>
           </button>
+          <span className="hidden sm:flex items-center gap-2 text-xs text-ink3 tabular-nums">
+            <span className={`w-1.5 h-1.5 rounded-full ${dirty ? 'bg-amber' : 'bg-violet'}`} />
+            {dirty ? 'Unsaved changes' : 'No changes'} · {wordCount} {wordCount === 1 ? 'word' : 'words'}
+          </span>
+        </div>
 
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleDiscard}
+            disabled={isSaving}
+            className="min-h-[44px] px-3 text-sm font-medium text-ink2 hover:text-ink transition-colors cursor-pointer"
+          >
+            Discard
+          </button>
           <button
             type="button"
             onClick={() => handleSave()}
             disabled={!content.trim() || isSaving}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium text-[#0D0F12] bg-[#8998F5] hover:bg-[#7888f3] disabled:bg-[#292E38] disabled:text-[#9299A5] rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 min-h-[44px] px-4 text-sm font-semibold text-white bg-violet hover:bg-[#9b72f8] hover:shadow-glow disabled:bg-s3 disabled:text-ink3 disabled:shadow-none rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed"
           >
-            <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+            <Check className="w-4 h-4 stroke-[2.5]" />
             <span>{isSaving ? 'Saving...' : initialEntry ? 'Update Entry' : 'Save Entry'}</span>
           </button>
         </div>
       </div>
 
-      {/* Writing Area */}
-      <div className="rounded-xl bg-[#14171C] border border-[#292E38] p-6 sm:p-8 space-y-4 shadow-sm">
-        {/* Title input */}
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title (optional)"
-          className="w-full bg-transparent text-xl sm:text-2xl font-semibold text-[#F5F5F5] placeholder-[#9299A5]/50 focus:outline-none tracking-tight"
-        />
+      <p className="inline-block px-3 py-1.5 rounded-full bg-s1 text-xs text-ink2 mb-4">{today}</p>
 
-        <div className="h-px bg-[#292E38]/60 w-full" />
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Untitled"
+        aria-label="Entry title"
+        className="w-full bg-transparent font-display text-4xl sm:text-5xl text-ink placeholder-ink3/60 focus:outline-none tracking-tight"
+      />
 
-        {/* Longform content textarea */}
-        <textarea
-          ref={textareaRef}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Write your thoughts freely... what happened today? What's on your mind?"
-          rows={14}
-          className="w-full bg-transparent text-sm sm:text-base text-[#F5F5F5] placeholder-[#9299A5]/40 focus:outline-none resize-none leading-relaxed font-normal"
-        />
+      <textarea
+        ref={textareaRef}
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="Write your thoughts freely... what happened today? What's on your mind?"
+        aria-label="Entry content"
+        rows={14}
+        className="mt-6 w-full min-h-[50vh] bg-transparent text-[17px] sm:text-lg text-ink/95 placeholder-ink3/60 focus:outline-none resize-none leading-[1.75]"
+      />
+
+      {/* Floating stats bar */}
+      <div className="fixed left-1/2 -translate-x-1/2 bottom-24 md:bottom-6 md:ml-30 z-20 px-5 py-2.5 rounded-full bg-s1/90 backdrop-blur-xl border border-line text-xs text-ink2 tabular-nums shadow-glow whitespace-nowrap">
+        <span className="text-ink">{wordCount}</span> words
+        <span className="mx-2 text-ink3">/</span>
+        {readMinutes(wordCount)} min read
+        <span className="mx-2 text-ink3">/</span>
+        {charCount} chars
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-xs text-[#9299A5]/60 px-1">
-        <span>Private & encrypted with Row Level Security</span>
-        <span className="sm:hidden tabular-nums">{wordCount} words</span>
-      </div>
+      <ConfirmationModal
+        isOpen={showDiscard}
+        title="Discard changes?"
+        message="Your unsaved changes to this entry will be lost."
+        confirmLabel="Discard"
+        isDangerous={true}
+        onConfirm={() => {
+          setShowDiscard(false);
+          onCancel();
+        }}
+        onCancel={() => setShowDiscard(false)}
+      />
     </div>
   );
 };

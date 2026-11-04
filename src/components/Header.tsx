@@ -13,19 +13,12 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ activeTab }) => {
   return (
-    <header className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-[#14171C]/95 backdrop-blur-md border-b border-[#292E38]">
-      <div className="flex items-center gap-2.5">
-        <div className="w-7 h-7 rounded-lg bg-[#191D24] border border-[#292E38] flex items-center justify-center text-[#8998F5]">
-          <span className="font-bold text-sm tracking-tight">M</span>
-        </div>
-        <span className="text-base font-semibold text-[#F5F5F5] tracking-tight">
-          {activeTab === 'tasks' ? 'My Tasks' : 'My Journal'}
-        </span>
+    <header className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-canvas/85 backdrop-blur-md">
+      <div className="min-w-0">
+        <span className="font-display text-xl text-ink tracking-tight leading-none">MySpace</span>
+        <span className="sr-only">{activeTab === 'tasks' ? 'My Tasks' : 'My Journal'}</span>
       </div>
-
-      <div className="flex items-center gap-2">
-        <UserProfile compact />
-      </div>
+      <UserProfile compact />
     </header>
   );
 };

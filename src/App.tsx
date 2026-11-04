@@ -24,7 +24,7 @@ function MainLayout() {
   const { entries } = useJournal();
 
   return (
-    <div className="min-h-screen bg-[#0D0F12] text-[#F5F5F5] flex flex-col md:flex-row">
+    <div className="min-h-screen bg-canvas text-ink flex flex-col md:flex-row">
       {/* Desktop Fixed Sidebar */}
       <Sidebar
         activeTab={activeTab}
@@ -37,8 +37,12 @@ function MainLayout() {
       <Header activeTab={activeTab} />
 
       {/* Main Content Area */}
-      <main className="flex-1 md:pl-64 min-h-screen pb-24 md:pb-8">
-        {activeTab === 'tasks' ? <TasksPage /> : <JournalPage />}
+      <main className="flex-1 md:pl-60 min-w-0 min-h-screen pb-28 md:pb-10">
+        {activeTab === 'tasks' ? (
+          <TasksPage onOpenJournal={() => setActiveTab('journal')} />
+        ) : (
+          <JournalPage />
+        )}
       </main>
 
       {/* Mobile Bottom Navigation Bar */}
@@ -57,9 +61,9 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#0D0F12]">
-        <div className="w-12 h-12 rounded-xl bg-[#14171C] border border-[#292E38] flex items-center justify-center text-[#8998F5] animate-pulse">
-          <span className="font-bold text-xl tracking-tight">M</span>
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-canvas">
+        <div className="w-12 h-12 rounded-xl bg-s2 border border-line flex items-center justify-center text-violet-soft animate-pulse">
+          <span className="font-display text-2xl">M</span>
         </div>
       </div>
     );
