@@ -1,8 +1,0 @@
-{
-  "name": "MySpace",
-  "description": "Minimalist personal productivity web app featuring My Tasks and My Journal with Supabase authentication and database.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}
