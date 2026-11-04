@@ -54,7 +54,7 @@ export const Login: React.FC = () => {
 
         <h2 className="mt-10 text-xl font-semibold text-ink">Welcome to MySpace</h2>
         <p className="mt-2 text-sm text-ink2 leading-relaxed max-w-xs">
-          Your personal space to organize thoughts, manage tasks, and stay focused.
+          Your personal space to organize thoughts, manage tasks and stay focused.
         </p>
 
         {displayError && (
