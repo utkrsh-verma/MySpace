@@ -52,9 +52,9 @@ export const Login: React.FC = () => {
           Your quiet corner
         </p>
 
-        <h2 className="mt-10 text-xl font-semibold text-ink">Welcome back</h2>
+        <h2 className="mt-10 text-xl font-semibold text-ink">Welcome to MySpace</h2>
         <p className="mt-2 text-sm text-ink2 leading-relaxed max-w-xs">
-          Your quiet, distraction-free personal space for thoughts and tasks.
+          Your personal space to organize thoughts, manage tasks, and stay focused.
         </p>
 
         {displayError && (

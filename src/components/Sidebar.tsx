@@ -31,10 +31,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-5 flex flex-col flex-1 min-h-0">
         <div className="px-2 pt-1 pb-8">
           <h1 className="font-display text-2xl text-ink tracking-tight leading-none">MySpace</h1>
-          <p className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink3">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber" />
-            Sanctuary for focus
-          </p>
         </div>
 
         <nav className="space-y-1" aria-label="Main">
