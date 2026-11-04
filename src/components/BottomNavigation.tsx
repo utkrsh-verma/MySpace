@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { ActiveTab } from '../types';
-import { CheckSquare, BookOpen } from 'lucide-react';
+import { CheckCircle2, BookOpen } from 'lucide-react';
 
 interface BottomNavigationProps {
   activeTab: ActiveTab;
@@ -20,48 +20,39 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   pendingTasksCount,
   journalEntriesCount,
 }) => {
-  return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#14171C]/95 backdrop-blur-md border-t border-[#292E38] px-4 py-2 pb-safe">
-      <div className="flex items-center justify-around max-w-md mx-auto">
-        <button
-          type="button"
-          onClick={() => onTabChange('tasks')}
-          className={`flex-1 min-h-[44px] flex flex-col items-center justify-center gap-1 rounded-lg py-1 transition-colors ${
-            activeTab === 'tasks'
-              ? 'text-[#8998F5]'
-              : 'text-[#9299A5] hover:text-[#F5F5F5]'
-          }`}
-        >
-          <div className="relative">
-            <CheckSquare className="w-5 h-5" />
-            {pendingTasksCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 min-w-4 h-4 px-1 rounded-full bg-[#8998F5] text-[#0D0F12] text-[10px] font-bold flex items-center justify-center">
-                {pendingTasksCount > 99 ? '99+' : pendingTasksCount}
-              </span>
-            )}
-          </div>
-          <span className="text-[11px] font-medium leading-none">Tasks</span>
-        </button>
+  const items: { id: ActiveTab; label: string; icon: React.ElementType; count: number }[] = [
+    { id: 'tasks', label: 'Tasks', icon: CheckCircle2, count: pendingTasksCount },
+    { id: 'journal', label: 'Journal', icon: BookOpen, count: journalEntriesCount },
+  ];
 
-        <button
-          type="button"
-          onClick={() => onTabChange('journal')}
-          className={`flex-1 min-h-[44px] flex flex-col items-center justify-center gap-1 rounded-lg py-1 transition-colors ${
-            activeTab === 'journal'
-              ? 'text-[#8998F5]'
-              : 'text-[#9299A5] hover:text-[#F5F5F5]'
-          }`}
-        >
-          <div className="relative">
-            <BookOpen className="w-5 h-5" />
-            {journalEntriesCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 min-w-4 h-4 px-1 rounded-full bg-[#292E38] text-[#F5F5F5] text-[10px] font-medium flex items-center justify-center">
-                {journalEntriesCount > 99 ? '99+' : journalEntriesCount}
-              </span>
-            )}
-          </div>
-          <span className="text-[11px] font-medium leading-none">Journal</span>
-        </button>
+  return (
+    <nav
+      aria-label="Main"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-30 px-4 pb-safe pt-2 pointer-events-none"
+    >
+      <div className="pointer-events-auto mx-auto max-w-sm flex items-center gap-1 p-1.5 rounded-2xl bg-s1/85 backdrop-blur-xl border border-line shadow-glow">
+        {items.map(({ id, label, icon: Icon, count }) => {
+          const active = activeTab === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onTabChange(id)}
+              aria-current={active ? 'page' : undefined}
+              className={`flex-1 min-h-[48px] flex items-center justify-center gap-2 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
+                active ? 'bg-violet/20 text-violet-soft' : 'text-ink2 hover:text-ink'
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span>{label}</span>
+              {count > 0 && (
+                <span className="text-[11px] tabular-nums opacity-70">
+                  {count > 99 ? '99+' : count}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
     </nav>
   );

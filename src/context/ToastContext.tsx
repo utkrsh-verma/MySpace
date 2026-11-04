@@ -34,12 +34,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
       {children}
-      <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full">
+      <div className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full">
         {toasts.map((toast) => (
           <div
             key={toast.id}
             role="status"
-            className="pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-[#191D24] border border-[#292E38] shadow-xl text-sm transition-all animate-in fade-in slide-in-from-bottom-2 duration-200"
+            className="pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-s2 border border-line shadow-xl text-sm transition-all animate-in fade-in slide-in-from-bottom-2 duration-200"
           >
             <div className="flex items-center gap-2.5 min-w-0">
               {toast.type === 'success' && (
@@ -49,14 +49,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
               )}
               {toast.type === 'info' && (
-                <Info className="w-4 h-4 text-[#8998F5] shrink-0" />
+                <Info className="w-4 h-4 text-violet-soft shrink-0" />
               )}
-              <span className="text-[#F5F5F5] font-normal truncate">{toast.text}</span>
+              <span className="text-ink font-normal truncate">{toast.text}</span>
             </div>
             <button
               onClick={() => removeToast(toast.id)}
               aria-label="Dismiss notification"
-              className="text-[#9299A5] hover:text-[#F5F5F5] transition-colors p-0.5 rounded"
+              className="text-ink2 hover:text-ink transition-colors p-1 rounded cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>

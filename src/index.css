@@ -1,44 +1,65 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --bg-main: #0D0F12;
-    --bg-secondary: #14171C;
-    --bg-card: #191D24;
-    --border-color: #292E38;
-    --text-primary: #F5F5F5;
-    --text-secondary: #9299A5;
-    --accent: #8998F5;
-  }
+/* MySpace design tokens (from the Stitch "MySpace" design system) */
+@theme {
+  --color-canvas: #111317;
+  --color-s1: #16181d;
+  --color-s2: #1e2024;
+  --color-s3: #282a2e;
+  --color-ink: #f3f4f6;
+  --color-ink2: #9ca3af;
+  --color-ink3: #6b7280;
+  --color-violet: #8b5cf6;
+  --color-violet-soft: #d0bcff;
+  --color-amber: #f59e0b;
+  --color-line: rgba(148, 163, 184, 0.12);
 
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
+
+  --shadow-glow: 0 8px 30px -4px rgba(139, 92, 246, 0.2);
+}
+
+@layer base {
   * {
-    border-color: #292E38;
+    border-color: rgba(148, 163, 184, 0.12);
   }
 
   body {
-    background-color: #0D0F12;
-    color: #F5F5F5;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #111317;
+    color: #f3f4f6;
+    font-family: var(--font-sans);
     min-height: 100vh;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgba(139, 92, 246, 0.7);
+    outline-offset: 2px;
   }
 }
 
-/* Custom scrollbar for dark theme */
+/* Safe-area padding for the mobile dock on notched phones */
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #0D0F12;
+  background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #292E38;
+  background: #282a2e;
   border-radius: 9999px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #3c4352;
+  background: #3a3d44;
 }

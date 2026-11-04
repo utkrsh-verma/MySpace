@@ -5,8 +5,9 @@
 
 import React, { useState } from 'react';
 import { JournalEntry } from '../types';
-import { Pencil, Trash2, Calendar, Clock } from 'lucide-react';
+import { BookOpen, Pencil, Trash2, Clock } from 'lucide-react';
 import { ConfirmationModal } from './ConfirmationModal';
+import { countWords, readMinutes, formatShortDate } from '../lib/text';
 
 interface JournalCardProps {
   entry: JournalEntry;
@@ -29,15 +30,13 @@ export const JournalCard: React.FC<JournalCardProps> = ({
     : 'Untitled Entry';
 
   const createdDate = new Date(entry.created_at);
-  const updatedDate = new Date(entry.updated_at);
-  const wasEdited = Math.abs(updatedDate.getTime() - createdDate.getTime()) > 5000;
-
-  const formattedDate = createdDate.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-
+  const wasEdited =
+    Math.abs(new Date(entry.updated_at).getTime() - createdDate.getTime()) > 5000;
+  const minutes = readMinutes(countWords(entry.content));
+  const isToday = formatShortDate(entry.created_at) === 'Today';
+  const dateLabel = isToday
+    ? `Today, ${createdDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+    : formatShortDate(entry.created_at);
   const formattedTime = createdDate.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
@@ -53,67 +52,69 @@ export const JournalCard: React.FC<JournalCardProps> = ({
     }
   };
 
+  const iconBtn =
+    'w-10 h-10 flex items-center justify-center text-ink2 rounded-lg transition-colors cursor-pointer';
+
   return (
     <>
       <article
         onClick={() => onSelect(entry)}
-        className="group relative flex flex-col justify-between p-5 rounded-xl bg-[#191D24] border border-[#292E38] hover:border-[#384050] transition-all cursor-pointer"
+        className="group flex items-start gap-2 p-5 sm:p-6 rounded-2xl bg-s1 border border-line hover:bg-s2 hover:-translate-y-px hover:border-slate-400/20 transition-all cursor-pointer"
       >
-        <div>
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <h3 className="text-base font-semibold text-[#F5F5F5] group-hover:text-white transition-colors line-clamp-1">
-              {displayTitle}
-            </h3>
-
-            {/* Actions */}
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity shrink-0"
-            >
-              <button
-                type="button"
-                onClick={() => onEdit(entry)}
-                title="Edit entry"
-                aria-label="Edit entry"
-                className="p-1.5 text-[#9299A5] hover:text-[#F5F5F5] hover:bg-[#14171C] rounded-md transition-colors cursor-pointer"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowDeleteConfirm(true)}
-                title="Delete entry"
-                aria-label="Delete entry"
-                className="p-1.5 text-[#9299A5] hover:text-rose-400 hover:bg-[#14171C] rounded-md transition-colors cursor-pointer"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink2">
+            <span className="px-2.5 py-1 rounded-full bg-s3 text-violet-soft font-medium">
+              {dateLabel}
+            </span>
+            <span>{minutes} min read</span>
+            {wasEdited && <span className="italic text-ink3">Edited</span>}
           </div>
 
-          {/* Snippet preview */}
-          <p className="text-sm text-[#9299A5] leading-relaxed line-clamp-3 mb-4 whitespace-pre-line">
+          <h3 className="font-display text-2xl sm:text-[28px] leading-tight text-ink mt-3 break-words">
+            {displayTitle}
+          </h3>
+
+          <p className="text-[15px] text-ink2 leading-relaxed line-clamp-2 mt-2 whitespace-pre-line">
             {entry.content}
+          </p>
+
+          <p className="flex items-center gap-1.5 text-xs text-ink3 mt-3">
+            <Clock className="w-3.5 h-3.5" />
+            {formattedTime}
           </p>
         </div>
 
-        {/* Metadata footer */}
-        <div className="flex items-center gap-3 text-xs text-[#9299A5]/80 pt-3 border-t border-[#292E38]/50">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>{formattedDate}</span>
-          </div>
-          <span aria-hidden="true" className="text-[#292E38]">·</span>
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{formattedTime}</span>
-          </div>
-          {wasEdited && (
-            <>
-              <span aria-hidden="true" className="text-[#292E38]">·</span>
-              <span className="text-[11px] text-[#9299A5]/60 italic">Edited</span>
-            </>
-          )}
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="flex flex-col shrink-0 -my-1 -mr-2 sm:mr-0 md:opacity-60 md:group-hover:opacity-100 transition-opacity"
+        >
+          <button
+            type="button"
+            onClick={() => onSelect(entry)}
+            title="Read entry"
+            aria-label="Read entry"
+            className={`${iconBtn} hover:text-ink hover:bg-s3`}
+          >
+            <BookOpen className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onEdit(entry)}
+            title="Edit entry"
+            aria-label="Edit entry"
+            className={`${iconBtn} hover:text-ink hover:bg-s3`}
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            title="Delete entry"
+            aria-label="Delete entry"
+            className={`${iconBtn} hover:text-rose-400 hover:bg-s3`}
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       </article>
 
