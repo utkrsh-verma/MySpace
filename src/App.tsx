@@ -62,9 +62,14 @@ function AppContent() {
   if (loading) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-canvas">
-        <div className="w-12 h-12 rounded-xl bg-s2 border border-line flex items-center justify-center text-violet-soft animate-pulse">
-          <span className="font-display text-2xl">M</span>
-        </div>
+        <img
+          src="/loading-logo.png"
+          alt="MySpace"
+          width={420}
+          height={304}
+          draggable={false}
+          className="w-40 sm:w-48 h-auto select-none animate-pulse"
+        />
       </div>
     );
   }
